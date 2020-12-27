@@ -4,6 +4,7 @@
 
 #include <sharedptr.hpp>
 #include <utility>
+#include <type_traits>
 
 TEST(SharedPtrTest, DefaultConstructor) {
   SharedPtr<int> ptr;
@@ -28,7 +29,9 @@ TEST(SharedPtrTest, CopyingConstructor) {
 
 TEST(SharedPtrTest, MovingConstructor) {
   SharedPtr<int> ptr(new int(123));
+
   auto tmp = ptr.get();
+  ASSERT_TRUE(std::is_move_constructible<SharedPtr<int>>::value);
   SharedPtr<int> ptr2(std::move(ptr));
 
   ASSERT_EQ(ptr.get(), nullptr);
@@ -82,6 +85,7 @@ TEST(SharedPtrTest, MovingOperator) {
   ASSERT_EQ(sharedPtr.get(), sharedPtr1.get());
 
   SharedPtr<int> sharedPtr2(ptr2);
+  ASSERT_TRUE(std::is_move_assignable<SharedPtr<int>>::value);
   sharedPtr1 = std::move(sharedPtr2);
 
   ASSERT_EQ(sharedPtr.use_count(), 1);

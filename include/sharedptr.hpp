@@ -11,18 +11,15 @@ class SharedPtr {
  public:
   SharedPtr() : object(nullptr), counter(nullptr) {}
 
-  explicit SharedPtr(T *ptr) : object(ptr), counter(new std::atomic_uint(1)) {}
+  SharedPtr(T *ptr) : object(ptr), counter(new std::atomic_uint(1)) {}
 
   SharedPtr(const SharedPtr &r) : object(r.object), counter(r.counter) {
     ++(*counter);
   }
 
-  SharedPtr(SharedPtr &&rr) noexcept {
-    object = rr.object;
-    counter = rr.counter;
-
-    rr.object = nullptr;
-    rr.counter = nullptr;
+  SharedPtr(SharedPtr &&rr) : object(nullptr), counter(nullptr) {
+    std::swap(object, rr.object);
+    std::swap(counter, rr.counter);
   }
 
   ~SharedPtr() {
@@ -42,13 +39,11 @@ class SharedPtr {
     return *this;
   }
 
-  SharedPtr &operator=(SharedPtr &&rr) noexcept {
+  SharedPtr &operator=(SharedPtr &&rr)  {
     //    if (rr == *this) return *this;
     reset();
-    object = rr.object;
-    counter = rr.counter;
-    rr.counter = nullptr;
-    rr.object = nullptr;
+    std::swap(object, rr.object);
+    std::swap(counter, rr.counter);
 
     return *this;
   }
